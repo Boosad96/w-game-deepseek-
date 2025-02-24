@@ -1,32 +1,205 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta property="fc:frame" content="vNext">
+    <meta property="fc:frame:image" content="https://i.ibb.co/Xkbfv015/imresizer-1740342437652.jpg"> 
+    <meta property="fc:frame:post_url" content="https://boosad96.github.io/w-game-.html">
+    <meta property="fc:frame:button:1" content="Play Now ▶️">
+    <meta property="og:image" content="https://i.ibb.co/Xkbfv015/imresizer-1740342437652.jpg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="fc:frame" content="vNext">
-    <meta property="fc:frame:image" content="https://i.ibb.co/Xkbfv015/imresizer-1740342437652.jpg">
-    <meta property="fc:frame:post_url" content="https://your-server.com/api/play">
-    <meta property="fc:frame:button:1" content="Jump ▶️">
-    <meta property="og:title" content="Warpcast Dino Game">
-    <meta property="og:description" content="Jump over obstacles with 'W' and beat your high score!">
-    <meta property="og:image" content="https://i.ibb.co/Xkbfv015/imresizer-1740342437652.jpg">
-    <meta property="og:url" content="https://warpcast.com/debabhi">
-    <meta name="description" content="Play the Warpcast Dino Game! Jump over obstacles with the 'W' character and beat your high score.">
+    <meta name="description" content="Play the Warpcast Dino Game! Jump over obstacles with the 'W' character and beat your high score. Fun and addictive!">
     <meta name="keywords" content="Warpcast, Dino Game, HTML5 Game, Jump Game, Fun Game">
     <meta name="author" content="Debabhi">
+    <meta property="og:title" content="Warpcast Dino Game">
+    <meta property="og:description" content="Jump over obstacles with the 'W' character and beat your high score. Fun and addictive!">
+    <meta property="og:url" content="https://warpcast.com/debabhi">
     <title>Warpcast Dino Game</title>
     <style>
         body {
             margin: 0;
-            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
+            overflow: hidden;
             font-family: Arial, sans-serif;
+        }
+        #game {
+            position: relative;
+            width: 600px;
+            height: 300px;
+            background: #f7f7f7;
+            border: 2px solid #000;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #f7f7f7, #E0F6FF);
+        }
+        #w-character {
+            position: absolute;
+            bottom: 10px;
+            left: 50px;
+            width: 40px;
+            height: 40px;
+            font-family: Arial, sans-serif;
+            font-size: 40px;
+            font-weight: bold;
+            color: #4A90E2;
             text-align: center;
+            line-height: 40px;
+        }
+        .obstacle {
+            position: absolute;
+            bottom: 10px;
+            width: 20px;
+            background: #4CAF50;
+            border-radius: 5px;
+        }
+        .obstacle.tall {
+            height: 60px;
+        }
+        .obstacle.short {
+            height: 30px;
+        }
+        .obstacle.moving {
+            animation: moveObstacle 2s linear infinite;
+        }
+        @keyframes moveObstacle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        #ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 10px;
+            background: #8B4513;
+        }
+        #score {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            color: #333;
+        }
+        #high-score {
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            font-size: 16px;
+            color: #555;
+        }
+        .cloud {
+            position: absolute;
+            top: 20px;
+            width: 60px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: moveCloud 10s linear infinite;
+        }
+        @keyframes moveCloud {
+            from { left: 100%; }
+            to { left: -60px; }
         }
     </style>
 </head>
 <body>
-    <h1>Warpcast Dino Game</h1>
-    <p>Click 'Jump ▶️' in Warpcast to play!</p>
-    <p>Note: This game requires a server to update the Frame dynamically.</p>
+    <div id="game">
+        <div id="score">Score: 0</div>
+        <div id="high-score">High Score: 0</div>
+        <div id="w-character">W</div>
+        <div id="ground"></div>
+        <div class="cloud" style="top: 30px; animation-duration: 15s;"></div>
+        <div class="cloud" style="top: 70px; animation-duration: 12s;"></div>
+    </div>
+
+    <script>
+        const wCharacter = document.getElementById('w-character');
+        const game = document.getElementById('game');
+        const scoreElement = document.getElementById('score');
+        const highScoreElement = document.getElementById('high-score');
+        
+        let isJumping = false;
+        let score = 0;
+        let highScore = localStorage.getItem('highScore') || 0;
+        let gameSpeed = 5;
+        let obstacles = [];
+
+        highScoreElement.textContent = `High Score: ${highScore}`;
+
+        function jump() {
+            if (!isJumping) {
+                isJumping = true;
+                let position = 0;
+                const jumpInterval = setInterval(() => {
+                    if (position >= 100) {
+                        clearInterval(jumpInterval);
+                        const fallInterval = setInterval(() => {
+                            if (position <= 0) {
+                                clearInterval(fallInterval);
+                                isJumping = false;
+                            }
+                            position -= 5;
+                            wCharacter.style.bottom = (10 + position) + 'px';
+                        }, 20);
+                    }
+                    position += 5;
+                    wCharacter.style.bottom = (10 + position) + 'px';
+                }, 20);
+            }
+        }
+
+        function createObstacle() {
+            const obstacle = document.createElement('div');
+            obstacle.classList.add('obstacle');
+            const types = ['tall', 'short', 'moving'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            obstacle.classList.add(type);
+            obstacle.style.right = '0px';
+            obstacle.style.height = type === 'tall' ? '60px' : type === 'short' ? '30px' : '40px';
+            game.appendChild(obstacle);
+            obstacles.push(obstacle);
+        }
+
+        function gameLoop() {
+            obstacles.forEach(obstacle => {
+                const right = parseInt(obstacle.style.right) || 0;
+                obstacle.style.right = (right + gameSpeed) + 'px';
+                const wRect = wCharacter.getBoundingClientRect();
+                const obstacleRect = obstacle.getBoundingClientRect();
+                
+                if (!(wRect.right < obstacleRect.left || 
+                      wRect.left > obstacleRect.right ||
+                      wRect.bottom < obstacleRect.top)) {
+                    if (score > highScore) {
+                        highScore = score;
+                        localStorage.setItem('highScore', highScore);
+                        highScoreElement.textContent = `High Score: ${highScore}`;
+                    }
+                    alert('Game Over! Score: ' + score);
+                    location.reload();
+                }
+                if (right > game.offsetWidth + 100) {
+                    obstacle.remove();
+                    obstacles = obstacles.filter(o => o !== obstacle);
+                }
+            });
+            score++;
+            scoreElement.textContent = `Score: ${score}`;
+            if (score % 500 === 0) {
+                gameSpeed += 1;
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') jump();
+        });
+        document.addEventListener('click', jump);
+        setInterval(createObstacle, 1500);
+        gameLoop();
+    </script>
 </body>
 </html>
